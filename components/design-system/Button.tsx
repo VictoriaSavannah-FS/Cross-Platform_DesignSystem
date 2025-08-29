@@ -1,26 +1,59 @@
+// src/components/design-system/Button.tsx
+
+/**KEEP all
+ * visuals
+ * layotu
+ * variants /colrs/ font / in HERE
+ * Reuasable logic--> responsive logic ->uitls
+ */
+
 import React from "react";
 import {
   TouchableOpacity,
   Text,
-  StyleSheet,
+  ActivityIndicator,
   ViewStyle,
   TextStyle,
-  ActivityIndicator,
-  Platform,
 } from "react-native";
-import { useTheme } from "../../theme/ThemeProvider";
+
+// Pull in your theme + tokens and responsive helpers
+import { useTheme } from "../../hooks/useTheme";
 import { useResponsive } from "../../hooks/useResponsive";
+import { responsive } from "../../utils/responsive";
+import { spacing } from "../../design-tokens/spacing";
+
+// -----BUTTON Variants Props-----
+/**
+ * Prim:filled-brnd color
+ * Sec:light fill / low emphasis
+ * Outline: transparen bckrgnd+colored border
+ * Ghost: NO Bckgrnd+ ONLY TXT---
+ */
+type Variant = "primary" | "secondary" | "outline" | "ghost";
+type Size = "sm" | "md" | "lg";
+
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
-  disabled?: boolean;
-  loading?: boolean;
-  fullWidth?: boolean;
+  // Visual style (filled/outline/etc.)
+  variant?: Variant;
+  // padding /typography size
+  size?: Size;
+  disabled?: boolean; //if bttn pressed/not
+  loading?: boolean; //@ spinner
+  fullWidth?: boolean; // Stretch to 100% width
+
+  // Click/press handler
   onPress?: () => void;
+
+  // Optional style overrides---
+
   style?: ViewStyle;
-  testID?: string;
+  textStyle?: TextStyle;
+  //a11y Label---
+  accessibilityLabel?: string;
 }
+
+// ----- Button Component -----
 export const Button: React.FC<ButtonProps> = ({
   children,
   variant = "primary",
@@ -30,130 +63,133 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   onPress,
   style,
-  testID,
+  textStyle,
+  // a11y: explicit screen reader label (fallback to text children if string)s
+  accessibilityLabel,
 }) => {
+  // Active theme (light/dark + tokens)
   const { theme } = useTheme();
-  const { responsive, isWeb } = useResponsive();
-  // Responsive sizing
-  const buttonSize = responsive({
-    xs: size === "lg" ? "md" : size, // Smaller on mobile
+
+  //RESPONSIVE Utisl ----------
+  // Crrent brlpoint / platform flags @responsive hook----
+  const { breakpoint, isWeb } = useResponsive();
+
+  // Size of bttns --> Adjust for small screens:
+
+  const buttonSize = responsive<Size>(breakpoint.name, {
+    // "xs" -> flback BTN "lg" -> "md"
+    xs: size === "lg" ? "md" : size,
+    // "md"+ -> default to prop req.
     md: size,
-  });
-  const getButtonStyles = (): ViewStyle => {
-    const baseStyles: ViewStyle = {
-      borderRadius: theme.spacing.sm,
-      alignItems: "center",
-      justifyContent: "center",
-      flexDirection: "row",
-      minHeight: buttonSize === "sm" ? 32 : buttonSize === "md" ? 40 : 48,
-      paddingHorizontal:
-        buttonSize === "sm" ? theme.spacing.sm : theme.spacing.md,
-      opacity: disabled || loading ? 0.6 : 1,
-    };
-    // Platform-specific adjustments
-    if (isWeb) {
-      baseStyles.cursor = disabled ? "not-allowed" : "pointer";
-      baseStyles.userSelect = "none";
-    }
-    if (fullWidth) {
-      baseStyles.width = "100%";
-    }
-    // Variant styles
-    switch (variant) {
-      case "primary":
-        return {
-          ...baseStyles,
-          backgroundColor: theme.colors.primary[500],
-          borderWidth: 0,
-        };
-      case "secondary":
-        return {
-          ...baseStyles,
-          backgroundColor: theme.colors.neutral[200],
-          borderWidth: 0,
-        };
-      case "outline":
-        return {
-          ...baseStyles,
-          backgroundColor: "transparent",
-          borderWidth: 1,
-          borderColor: theme.colors.primary[500],
-        };
-      case "ghost":
-        return {
-          ...baseStyles,
-          backgroundColor: "transparent",
-          borderWidth: 0,
-        };
-      default:
-        return baseStyles;
-    }
+    default: size, // fllback
+  })!;
+
+  // size -> into actual values ---- need to updated based on visual ---
+  const minHeight = buttonSize === "sm" ? 32 : buttonSize === "md" ? 40 : 48;
+  const paddingX = buttonSize === "sm" ? spacing.sm : spacing.md;
+
+  //Coantiner style shared by all variants
+  const base: ViewStyle = {
+    // fllback to spcing token--
+    borderRadius: spacing.sm,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    minHeight,
+    paddingHorizontal: paddingX,
+    // cool loadign FX -> dim @loading
+    opacity: disabled || loading ? 0.6 : 1,
+    // button -- adapt to window size - widht to fit
+    ...(fullWidth ? { width: "100%" } : null),
+
+    // Web-only ------
+    /**cursor: styles -> when to press/X
+     * userSElsect: "none"prevents txt from pressed/selct.
+     * Importatn: Conditinal so doesn't apply to native platfrms
+     */
+
+    ...(isWeb
+      ? ({
+          cursor: disabled ? "not-allowed" : "pointer",
+          userSelect: "none",
+        } as any)
+      : null),
   };
-  const getTextStyles = (): TextStyle => {
-    const baseStyles: TextStyle = {
-      fontSize:
-        buttonSize === "sm"
-          ? theme.typography.fontSize.sm
-          : theme.typography.fontSize.base,
-      fontWeight: theme.typography.fontWeight.medium,
-      fontFamily: theme.typography.fontFamily.sans,
-    };
-    // Variant text colors
-    switch (variant) {
-      case "primary":
-        return {
-          ...baseStyles,
-          color: theme.colors.neutral[50],
-        };
-      case "secondary":
-        return {
-          ...baseStyles,
-          color: theme.colors.neutral[700],
-        };
-      case "outline":
-      case "ghost":
-        return {
-          ...baseStyles,
-          color: theme.colors.primary[500],
-        };
-      default:
-        return baseStyles;
-    }
+
+  // Visual variants -------- BELATRIX brand Tokens
+  /** primary: filled (red @ dark)
+   * Pass desing tokens
+   */
+
+  const containerByVariant: Record<Variant, ViewStyle> = {
+    primary: { backgroundColor: theme.colors.primary[500] },
+    secondary: { backgroundColor: theme.colors.surface },
+    outline: {
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    ghost: { backgroundColor: "transparent" },
   };
+
+  //Base text style - sze adpats responsive---
+  const textBase: TextStyle = {
+    fontSize:
+      buttonSize === "sm"
+        ? theme.typography.fontSize.sm
+        : theme.typography.fontSize.base,
+    fontWeight: theme.typography.fontWeight.medium as TextStyle["fontWeight"],
+    fontFamily: theme.typography.fontFamily.sans,
+  };
+
+  // Text color based VARIANT ------------
+  /**REsponsive -----
+   * prim/sec -> use theme text
+   * outline/ghost -> use brand color for emphasis*/
+  const textByVariant: Record<Variant, TextStyle> = {
+    primary: { color: theme.colors.text.primary },
+    secondary: { color: theme.colors.text.primary },
+    outline: { color: theme.colors.primary[500] },
+    ghost: { color: theme.colors.primary[500] },
+  };
+
+  // handler: prevent clicks while disabled/loading
   const handlePress = () => {
-    if (disabled || loading) return;
-    onPress?.();
+    if (!disabled && !loading) onPress?.();
   };
+
+  //------------------- UI RENDER -------------------
   return (
     <TouchableOpacity
-      style={[getButtonStyles(), style]}
+      // a11y ----
+      accessibilityRole="button"
+      accessibilityState={{ disabled: disabled || loading, busy: loading }}
+      //a11y -- fallback/failsafef
+      accessibilityLabel={
+        accessibilityLabel ??
+        (typeof children === "string" ? children : undefined)
+      }
+      style={[base, containerByVariant[variant], style]}
       onPress={handlePress}
       disabled={disabled || loading}
-      testID={testID}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: disabled || loading }}
-      // Web-specific props
-      {...(isWeb && {
-        onMouseEnter: () => {
-          // Add hover effects for web
-        },
-        onMouseLeave: () => {
-          // Remove hover effects
-        },
-      })}
     >
+      {/* Optional spinner --> @ left when loading */}
       {loading && (
         <ActivityIndicator
           size="small"
           color={
             variant === "primary"
-              ? theme.colors.neutral[50]
-              : theme.colors.primary[500]
+              ? theme.colors.text.primary // pass clr varnt token
+              : theme.colors.primary[500] // spinner@brand clr w/ trnsprnt variants--- cool...
           }
-          style={{ marginRight: theme.spacing.xs }}
+          style={{ marginRight: spacing.xs }}
         />
       )}
-      <Text style={getTextStyles()}>{children}</Text>
+
+      {/* Button label */}
+      <Text style={[textBase, textByVariant[variant], textStyle]}>
+        {children}
+      </Text>
     </TouchableOpacity>
   );
 };
