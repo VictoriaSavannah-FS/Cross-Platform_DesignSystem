@@ -4,7 +4,7 @@ import { useColorScheme } from "react-native";
 // design tokens -----------------
 import { colors as allColors } from "../design-tokens/colors";
 import { spacing } from "../design-tokens/spacing";
-import { typography } from "../components/design-system/Typography";
+import { typography } from "../design-tokens/typography";
 import { breakpoints } from "../utils/breakpoints";
 
 // -------- TYPES -------
