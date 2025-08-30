@@ -51,6 +51,8 @@ interface ButtonProps {
   textStyle?: TextStyle;
   //a11y Label---
   accessibilityLabel?: string;
+  // allow Link role ---
+  accessibilityRole?: "button" | "link";
 }
 
 // ----- Button Component -----
@@ -64,8 +66,9 @@ export const Button: React.FC<ButtonProps> = ({
   onPress,
   style,
   textStyle,
-  // a11y: explicit screen reader label (fallback to text children if string)s
+  // a11y: explicit screen reader label (fallback to text children if string)
   accessibilityLabel,
+  accessibilityRole,
 }) => {
   // Active theme (light/dark + tokens)
   const { theme } = useTheme();
@@ -158,17 +161,23 @@ export const Button: React.FC<ButtonProps> = ({
     if (!disabled && !loading) onPress?.();
   };
 
+  /** ----Accessibility Labels failsafes
+   * ifno a11y labels --> read plain "text"
+   */
+
+  const plainLabel =
+    // chck IF a11y label exist -> IF Not falbback to reade string "text" - else udnefiend
+    accessibilityLabel ??
+    (typeof children === "string" ? (children as string) : undefined);
+
   //------------------- UI RENDER -------------------
   return (
     <TouchableOpacity
       // a11y ----
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole ?? "button"}
       accessibilityState={{ disabled: disabled || loading, busy: loading }}
       //a11y -- fallback/failsafef
-      accessibilityLabel={
-        accessibilityLabel ??
-        (typeof children === "string" ? children : undefined)
-      }
+      accessibilityLabel={plainLabel}
       style={[base, containerByVariant[variant], style]}
       onPress={handlePress}
       disabled={disabled || loading}

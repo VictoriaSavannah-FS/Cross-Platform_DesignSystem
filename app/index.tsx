@@ -28,24 +28,43 @@ export default function Home() {
       <View style={{ padding: 24, gap: 12 }}>
         <Typography
           variant="h1"
-          style={{ fontSize: 22, fontWeight: "600", alignSelf: "center" }}
+          style={{ fontWeight: "600", alignSelf: "center" }}
         >
           Bellatrix
         </Typography>
 
         {/* need to fix link issues ----  diff. variants ---*/}
         <Link href="/documentation" asChild>
-          <Button fullWidth>Documentation</Button>
+          <Button
+            fullWidth
+            // a11y lables ---
+            accessibilityLabel="Go to documentation"
+            accessibilityRole="link"
+          >
+            Documentation
+          </Button>
         </Link>
 
         <Link href="/playground" asChild>
-          <Button fullWidth variant="secondary">
+          <Button
+            fullWidth
+            variant="secondary"
+            // a11y lables ---
+            accessibilityLabel="Go to playground"
+            accessibilityRole="link"
+          >
             Sandbox / Playground
           </Button>
         </Link>
 
         <Link href="/comX" asChild>
-          <Button fullWidth variant="ghost">
+          <Button
+            fullWidth
+            variant="ghost"
+            // a11y lables ---
+            accessibilityLabel="Go to components page"
+            accessibilityRole="link"
+          >
             Components 📍
           </Button>
         </Link>
