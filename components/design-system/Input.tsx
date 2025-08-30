@@ -16,7 +16,6 @@ import {
   ViewStyle,
   TextStyle,
   TextInputProps,
-  Platform,
 } from "react-native";
 
 import { useTheme } from "../../hooks/useTheme";
@@ -24,45 +23,24 @@ import { useResponsive } from "../../hooks/useResponsive";
 import { responsive as responsiveUtil } from "../../utils/responsive";
 import { spacing } from "../../design-tokens/spacing";
 
-/** ---------- Validation helpers (mini utils) ----------- */
-// We allow some simple "rules" to be passed in
-type Rule =
-  | { type: "required"; message?: string }
-  | { type: "email"; message?: string }
-  | { type: "minLength"; value: number; message?: string };
+// Import new VAlidation utils----
+import { runValidation, type Rule } from "../../utils/validation";
 
-// Function that checks the value against all rules
-function runValidation(value: string, rules?: Rule[]): string | null {
-  if (!rules?.length) return null;
-
-  for (const r of rules) {
-    if (r.type === "required" && !value.trim()) {
-      return r.message ?? "This field is required.";
-    }
-    if (r.type === "email") {
-      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      if (!ok) return r.message ?? "Please enter a valid email.";
-    }
-    if (r.type === "minLength" && value.length < r.value) {
-      return r.message ?? `Must be at least ${r.value} characters.`;
-    }
-  }
-  return null;
-}
-
-/** ---------- Props (what users can pass in) ----------- */
+/** ---------- Props ----------- */
 type Size = "sm" | "md" | "lg";
 
 interface InputProps extends Omit<TextInputProps, "onChangeText" | "style"> {
   label?: string; // optional top label
   helperText?: string; // small hint under the field
-  errorText?: string; // external error (overrides local validation)
-  rules?: Rule[]; // simple validation rules
-  size?: Size; // adjust padding/font size
-  fullWidth?: boolean; // stretch input across screen
-  onChangeText?: (value: string) => void;
-  style?: ViewStyle; // container style override
-  inputStyle?: TextStyle; // textinput style override
+  errorText?: string; // external error
+  rules?: Rule[]; //<---VAldiaiton Rules
+  size?: Size; // Responsive size/font/pading
+  fullWidth?: boolean; // Responsive->paddign /size
+  onChangeText?: (value: string) => void; ///trigere
+
+  //   Style overrides ------
+  style?: ViewStyle;
+  inputStyle?: TextStyle;
 }
 
 /** ---------- Component ------------------------------- */
@@ -77,42 +55,74 @@ export const Input: React.FC<InputProps> = ({
   value = "",
   style,
   inputStyle,
-  ...rest
+  ...rest //any other TextInput props caller paasses----
 }) => {
+  // import Theme+brkpint utils----
   const { theme } = useTheme();
   const { breakpoint, isWeb } = useResponsive();
 
-  /** --- Responsive control size (smaller padding on xs) --- */
+  /** --- Responsive control size --- */
   const controlSize = useMemo<Size>(() => {
     return (
+      // /check brkpoint /size ---
       responsiveUtil<Size>(breakpoint.name, {
-        xs: size === "lg" ? "md" : size, // shrink lg → md on tiny screens
-        md: size, // normal size otherwise
+        // shrink lg -> md on tiny screens
+        xs: size === "lg" ? "md" : size,
+
+        // normal size otherwise
+        md: size,
         default: size,
-      }) ?? size
+      }) ?? size //deflt size
     );
   }, [breakpoint.name, size]);
 
-  // Derived paddings + font sizes
+  // Derived paddings + font sizes ---- logic hanlding
+  /** ----- VERTICAL PAdding -----
+   * if sm input -> tighter Vertical padding
+   * if md input-> more breathign room
+   * if lg inout-> tallest padding
+   */
   const paddY = controlSize === "sm" ? 8 : controlSize === "md" ? 10 : 12;
+  /** ----- HORIZAONTAL PADDIGN-----
+   * pass spacing token
+   * if sm-> pass sm spacing token
+   * if md-> m spacing token / dflt
+   */
   const paddX = controlSize === "sm" ? spacing.sm : spacing.md;
+
+  /** ----- FONT SIZE -----
+   * pass typogrphy token
+   * if sm -> pass typo. smll token
+   * if md/lg-> deaflut noamrl size token
+   */
   const fontSize =
     controlSize === "sm"
       ? theme.typography.fontSize.sm
       : theme.typography.fontSize.base;
 
-  /** --- Validation state --- */
+  /** --- Validation state
+   * PAss NEW valdiatin Utils! :) --- */
   const [touched, setTouched] = useState(false); // has user interacted?
+  /** --- Erron hadnlign Logic----
+   *   only validte --> touches is true
+   * AND -> NO external X errors @validaiton'
+   * runs - validaiton helper to chekc rules
+   * Else-> not touched/interacted-> no Valdation
+   * */
   const localError =
     touched && !errorText ? runValidation(String(value), rules) : null;
   const showError = errorText ?? localError; // prefer external error if given
 
-  /** --- Base container (wraps everything vertically) --- */
+  /** --- Base container (wraps everything vertically) ---
+   * great to check Input caontienr and IF it needs to strewtch the width of screen
+   */
   const container: ViewStyle = {
     width: fullWidth ? "100%" : undefined,
   };
 
-  /** --- Input box visual styles --- */
+  /** --- Input box visual styles ---
+   * pass theme / desing tokesn fro styles
+   */
   const field: TextStyle = {
     backgroundColor: theme.colors.surface,
     color: theme.colors.text.primary,
@@ -125,23 +135,31 @@ export const Input: React.FC<InputProps> = ({
     fontFamily: theme.typography.fontFamily.sans,
 
     // Web niceties: remove browser default blue outline
+    // checks platform and adjust styls acoridnly ---
     ...(isWeb ? ({ outlineStyle: "none" } as any) : null),
   };
 
-  /** --- Helper or error text under the field --- */
+  /** --- Helper/ error text under the field --- */
   const subtle: TextStyle = {
+    // styles ---
     marginTop: 6,
     fontSize: theme.typography.fontSize.xs,
-    color: showError
-      ? theme.colors.semantic.error
+    color: showError //red deflt
+      ? theme.colors.semantic.error //pass color tokens
       : theme.colors.text.secondary,
   };
+
+  //Contional----- for email fiild
+  // --> pick keyboard for email if rule is present (but allow override)
+  const wantsEmail = rules?.some((r) => r.type === "email");
+  const keyboardType =
+    rest.keyboardType ?? (wantsEmail ? "email-address" : "default");
 
   /** --- UI render --- */
   return (
     <View style={[container, style]}>
-      {/* Label (optional) */}
-      {!!label && (
+      {/* ---- Label (I like it....) */}
+      {label && (
         <Text
           style={{
             marginBottom: 6,
@@ -154,32 +172,26 @@ export const Input: React.FC<InputProps> = ({
         </Text>
       )}
 
-      {/* Actual input field */}
+      {/* -----  Actual input field ---- */}
       <TextInput
         value={String(value)}
         onChangeText={(txt) => {
           onChangeText?.(txt);
           if (!touched) setTouched(true); // mark as touched on first input
         }}
-        onBlur={() => setTouched(true)} // mark touched when leaving field
+        onBlur={() => setTouched(true)} // mark as touched
         placeholderTextColor={theme.colors.text.disabled}
         style={[field, inputStyle]}
-        // iOS/Android keyboard defaults
+        // iOS defults ----
         autoCapitalize={rest.autoCapitalize ?? "none"}
         autoCorrect={rest.autoCorrect ?? false}
-        // Optional subtle shadows depending on platform
-        {...(Platform.OS === "android"
-          ? ({ elevation: 0 } as any)
-          : ({
-              shadowColor: "#000",
-              shadowOpacity: 0.05,
-              shadowRadius: 2,
-              shadowOffset: { width: 0, height: 1 },
-            } as any))}
-        {...rest}
+        keyboardType={keyboardType} //keybrdType
+        //a11y props----
+        accessibilityLabel={label} //laebl text
+        accessibilityHint={showError ?? helperText} //subtetx---
       />
 
-      {/* Helper or error message below field */}
+      {/* ---- subtext ------ */}
       {(helperText || showError) && (
         <Text accessibilityLiveRegion="polite" style={subtle}>
           {showError ?? helperText}
@@ -188,3 +200,17 @@ export const Input: React.FC<InputProps> = ({
     </View>
   );
 };
+
+/**
+ * b/c I'm a Visual Learner--- 
+ * CONTAIENER <View> = OuterBOx
+┌──────────────────────────────┐
+│  Label (optional)            │   <- top label -> passsed as prop
+├──────────────────────────────┤
+│  [   TextInput Field   ]     │   <- the input box -> typign field
+├──────────────────────────────┤
+│  helper text OR error text   │   <- feedback under field -> subtext
+└──────────────────────────────┘            -> changes @validation'
+ * 
+ * 
+ */
