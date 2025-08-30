@@ -19,12 +19,12 @@ export default function Home() {
       }}
     >
       <Typography variant="h3">Mode: {theme.mode}</Typography>
-
+      {/* Works---- */}
       <Button variant="outline" onPress={toggleTheme}>
         Toggle Theme
       </Button>
 
-      {/* Simple “hero” area */}
+      {/* Simple “hero” area - BEALLTRIX Title --- */}
       <View style={{ padding: 24, gap: 12 }}>
         <Typography
           variant="h1"
@@ -33,7 +33,7 @@ export default function Home() {
           Bellatrix
         </Typography>
 
-        {/* Use children (not "title") with your DS Button */}
+        {/* need to fix link issues ----  diff. variants ---*/}
         <Link href="/documentation" asChild>
           <Button fullWidth>Documentation</Button>
         </Link>

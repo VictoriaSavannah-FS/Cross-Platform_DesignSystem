@@ -11,14 +11,11 @@ export default function DocumentationScreen() {
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <Typography variant="h2" align="center">
-        Design System Documentation
+        Design System Documentation will go here....
       </Typography>
       <Typography variant="body1" style={{ marginTop: 12 }}>
-        Welcome to the Bellatrix Design System. Here you’ll find usage
-        guidelines, component descriptions, and examples of how to use our
-        reusable UI building blocks.
+        Documentation - use guidelines ....
       </Typography>
-      {/* Later: add sections for colors, spacing, typography, button variants, etc. */}
     </View>
   );
 }

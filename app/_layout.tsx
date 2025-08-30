@@ -1,7 +1,9 @@
 // app/_layout.tsx
 import React from "react";
 import { Stack } from "expo-router";
-import { ThemeProvider } from "../theme/ThemeProvider"; // adjust path if no alias
+import { ThemeProvider } from "../theme/ThemeProvider";
+
+// troublehsoot - link issue -- ANv Adpat to platform---
 
 export default function Layout() {
   return (
