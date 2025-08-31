@@ -66,7 +66,7 @@ export default function Home() {
           </Button>
         </Link>
 
-        <Link href="/comX" asChild>
+        {/* <Link href="/comX" asChild>
           <Button
             fullWidth
             variant="ghost"
@@ -76,7 +76,7 @@ export default function Home() {
           >
             Components 📍
           </Button>
-        </Link>
+        </Link> */}
       </View>
       {/* </ThemeProvider> */}
     </SafeAreaView>

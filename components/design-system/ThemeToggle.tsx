@@ -19,6 +19,7 @@ export const ThemeToggle = () => {
 
   return (
     <Button
+      // a11y labels ----
       variant="ghost"
       onPress={toggleTheme}
       accessibilityLabel={`Switch to ${label}`}

@@ -26,6 +26,10 @@ import { useResponsive } from "../../hooks/useResponsive";
 import { responsive } from "../../utils/responsive";
 import { spacing } from "../../design-tokens/spacing";
 
+// A11y Labels Enhacements----
+import { Platform, Pressable } from "react-native";
+import * as Haptics from "expo-haptics";
+
 // -----BUTTON Variants Props-----
 /**
  * Prim:filled-brnd color
@@ -53,10 +57,9 @@ interface ButtonProps
   // Optional style overrides---
   style?: ViewStyle;
   textStyle?: TextStyle;
-  //a11y Label---
+  // ------------- a11y Label ----------------
   accessibilityLabel?: string;
-  // allow Link role ---
-  accessibilityRole?: "button" | "link";
+  accessibilityRole?: "button" | "link"; // allow Link role ---
 }
 
 // ----- Button Component -----
@@ -82,6 +85,15 @@ export const Button: React.FC<ButtonProps> = ({
   //RESPONSIVE Utisl ----------
   // Crrent brlpoint / platform flags @responsive hook----
   const { breakpoint, isWeb } = useResponsive();
+  // accessibiliy update ------ chekcs platfrom and onPRess
+
+  const onKeyDown = (e: any) => {
+    if (!isWeb || disabled || loading) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handlePress(e);
+    }
+  };
 
   // Size of bttns --> Adjust for small screens:
   const buttonSize = responsive<Size>(breakpoint.name, {
@@ -167,11 +179,17 @@ export const Button: React.FC<ButtonProps> = ({
       (e as any).preventDefault?.();
       return;
     }
-    /**NOTE: `onPress` here is either:
-     * - the handler injected by <Link asChild>
-     * OR --> onPress passed
-     * --> result -> still call single unified onPress.
-     * */
+    // a11y acessibiliyt ----- Haptics
+    if (Platform.OS !== "web") {
+      if (variant === "primary") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } else if (variant === "secondary") {
+        Haptics.selectionAsync();
+      } else {
+        // outline / ghost...booo!
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+      }
+    }
     onPress?.(e);
   };
 
@@ -190,6 +208,9 @@ export const Button: React.FC<ButtonProps> = ({
       {...touchableProps}
       onPress={handlePress} // composed handler (only once)
       // a11y ----
+      // @ts-ignore (TouchableOpacity on Web does support keydown) ---
+      onKeyDown={onKeyDown as any}
+      focusable // helps web keyboard users
       accessibilityRole={accessibilityRole ?? "button"}
       accessibilityState={{ disabled: disabled || loading, busy: loading }}
       //a11y -- fallback/failsafef

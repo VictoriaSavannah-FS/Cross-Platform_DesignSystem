@@ -17,9 +17,9 @@ import {
   Pressable,
   Platform,
   StyleSheet,
-  FlatList,
-  Modal,
+  Modal as RNModal, // alias to avoid confusion
   ViewStyle,
+  AccessibilityInfo,
 } from "react-native";
 import { useTheme } from "../../hooks/useTheme";
 import { spacing } from "../../design-tokens/spacing";
@@ -27,6 +27,8 @@ import { breakpoints } from "../../utils/breakpoints";
 import { Button } from "./Button";
 import { ThemeProvider } from "../../theme/ThemeProvider";
 import { useResponsive } from "../../hooks/useResponsive";
+// a11y label role ---
+import { AccessibilityRole } from "react-native";
 
 /** PSUDEO CODE--
  * IF (modal is visible) THEN
@@ -52,13 +54,17 @@ type ModalComponentProps = {
 
   //trigger --> will Close modal-----
   onClose: () => void;
-  fullScreen: boolean; //full/X sceen size--
+  fullScreen?: boolean; //full/X sceen size-- (optional default)
   //   optina---
   title?: string;
   footer?: React.ReactNode; //actionRow--> Confrim/Canxxel
   children: React.ReactNode; //target inside Modal content
   //Allow! extneral styles ---
   style?: ViewStyle;
+
+  // a11y overrides (optional) ----
+  accessibilityLabel?: string;
+  accessibilityRole?: AccessibilityRole; // maps to ARIA on web; native uses accessibilityViewIsModal
 };
 
 // deifni fx+pass Props ^^^
@@ -71,9 +77,12 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
   footer,
   children,
   style, // had to add --
+
+  // a11y label -----
+  accessibilityLabel,
+  accessibilityRole = "dialog",
 }) => {
   // impot temes+responsive ----- check paltform/size
-
   const { theme } = useTheme(); //folwo theme
   const { isDesktop } = useResponsive();
 
@@ -82,6 +91,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
 
   // if not visobl - don't do anything --
   if (!visible) return null;
+
   /**--Pass Theme tokens for Elevetaed theme Dialogs/FullSCreen  */
   const overlayColor = "rgba(0,0,0,0.5)"; //from RNelemnts.
   // passcolo Tokes
@@ -107,10 +117,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
     // Overlay
     overlay: {
       position: "absolute", //covers all scren--
-      // shorthadn - mdmn docs
-      // inset: 0,
       inset: 0 as any, //TS -->for RN native -- - ***
-
       backgroundColor: overlayColor,
       // Center + Modal onpage
       justifyContent: "center",
@@ -119,7 +126,6 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
 
     container: {
       // width -- RESPONSIVE/paltform
-      // width: "92%",
       width: "95%",
       maxWidth: 560,
 
@@ -136,6 +142,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.md,
       borderBottomColor: borderColor,
+      borderBottomWidth: StyleSheet.hairlineWidth,
     },
     body: {
       // content ---- pass toekn
@@ -165,26 +172,13 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
     },
     // close X btuon arear -
     closeModal: {
-      // palcehoder for the X bttn ot close screen---
       position: "absolute",
-      //   theme-token / padding aroudn edges
       top: spacing.sm,
       right: spacing.sm,
     },
   });
 
   //----- IF Platfrom == iOS -- STYLES | UI RENDER -------
-
-  /***
-   * sldies from bttm
-   * has a "Grabebr Area"
-   *  -- needde fro mobile --
-   * [https://reactnative.dev/docs/modal]
-   * On web, the modal is presented as a separate route, and the dismiss behavior has to be provided manually using router.canGoBack(). ??
-   * --> [https://docs.expo.dev/router/advanced/modals/]
-   */
-
-  // pass theme/design tokesn for consistency
   const sheetStyles = StyleSheet.create({
     overlay: {
       // -- overleya style---
@@ -222,7 +216,9 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       color: textPrim,
       fontFamily: theme.typography.fontFamily.sans,
       fontSize: theme.typography.fontSize.lg,
-      fontWeight: theme.typography.fontWeight.medium,
+      fontWeight: theme.typography.fontWeight.medium as any,
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.sm,
     },
     // conent dispaly ARea----
     body: {
@@ -247,23 +243,38 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
         // Backdrop
         style={dialogStyles.overlay}
         // a11y: label ---
-        accessibilityLabel="Modal overlay"
-        accessible
+        accessibilityViewIsModal
+        // accessibilityRole={accessibilityRole}
+        accessibilityLabel={accessibilityLabel ?? title ?? "Dialog"}
       >
         {/* Dialog container */}
         <View
-          style={(dialogStyles.container, style)}
+          style={[dialogStyles.container, style]} // <-- FIXED: keep base + external style
           // a11y: announce this is a dialog
-          //   accessibilityRole="Dialog" -- View? Text?
-          accessibilityLabel={title ?? "Dialog"}
+          // accessibilityRole={accessibilityRole}
+          accessibilityLabel={accessibilityLabel ?? title ?? "Dialog"}
+          importantForAccessibility="yes"
         >
+          {/* Optional title */}
+          {title ? (
+            <View style={dialogStyles.header}>
+              <Text accessibilityRole="header" style={dialogStyles.title}>
+                {title}
+              </Text>
+            </View>
+          ) : null}
+
           {/* Body */}
           <View style={dialogStyles.body}>{children}</View>
 
           {/* Footer --- CLOSE  */}
-          <View style={dialogStyles.footer}>
+          <View style={dialogStyles.footer} accessibilityRole="toolbar">
             {footer ?? (
-              <Button variant="outline" onPress={onClose}>
+              <Button
+                variant="outline"
+                onPress={onClose}
+                accessibilityHint="Close dialog"
+              >
                 Close
               </Button>
             )}
@@ -279,61 +290,53 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
    * To dismiss it, swipe it down from the top.
    */
   return (
-    <Modal
+    <RNModal
       visible={visible}
       animationType="slide" // native slide animation**
       transparent
+      onRequestClose={onClose} // Android back button
+      // a11y: treat as modal region for SRs
+      accessibilityViewIsModal
+      presentationStyle={fullScreen ? "fullScreen" : "overFullScreen"}
     >
       {/* STOP backdrop press from closing when touching the sheet */}
-      <View style={sheetStyles.overlay}>
+      <View style={sheetStyles.overlay} accessibilityViewIsModal>
         <Pressable
           onPress={() => {}}
-          style={sheetStyles.sheet} //merging nboth styles/ defalut or extenal---
-          //   accessibilityRole="dialog"
-          accessibilityLabel={title ?? "Bottom sheet"}
+          style={[sheetStyles.sheet, style]} //merging nboth styles/ defalut or extenal---
+          // accessibilityRole={accessibilityRole}
+          accessibilityLabel={accessibilityLabel ?? title ?? "Bottom sheet"}
+          importantForAccessibility="yes"
         >
           {/* Grabbr ----- */}
-          <View style={sheetStyles.grabberArea}>
+          <View
+            style={sheetStyles.grabberArea}
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+          >
             <View style={sheetStyles.grabber} />
           </View>
+
+          {/* Optional title */}
+          {title ? (
+            <Text accessibilityRole="header" style={sheetStyles.title}>
+              {title}
+            </Text>
+          ) : null}
+
           {/* Content */}
           <View style={sheetStyles.body}>{children}</View>
 
           {/* Footer actions or default Close */}
-          <View style={sheetStyles.footer}>
-            {footer ?? <Button onPress={onClose}>Close</Button>}
+          <View style={sheetStyles.footer} accessibilityRole="toolbar">
+            {footer ?? (
+              <Button onPress={onClose} accessibilityHint="Close modal">
+                Close
+              </Button>
+            )}
           </View>
         </Pressable>
       </View>
-    </Modal>
+    </RNModal>
   );
 };
-
-/** React.FC
- * - a type that ships i/ React's typeScript types
- * represents the type of a fucntinal compooent --> the builing block of most modern React apps
- * [https://www.totaltypescript.com/you-can-stop-hating-react-fc]- TotalTypeScript - MAtt
- * -But - I still don't think it's the best way to annotate your types. That accolade goes to annotating props directly:
-import React from "react";
-
-const Component = (props: { name: string }) => {
-  return <div>{props.name}</div>;
-};
-
-This approach is nicer because it's friendlier to beginners - you don't need to know what React.FC is, or even what type argument syntax is. It's also slightly easier to refactor to a generic component if needed.
- * 
-* Overlay FX----
-* [https://reactnative.dev/docs/dropshadowvalue]
-* [https://reactnativeelements.com/docs/1.2.0/overlay]
-* windowBackgroundColor
-Background color for the overlay background
-
-Type	Default
-string	rgba(0, 0, 0, .5)
-
--Inset:[https://developer.mozilla.org/en-US/docs/Web/CSS/inset]
--overflow[https://developer.mozilla.org/en-US/docs/Web/CSS/overflow]
- 
-- iOS Docs for sheets styles -- so many! 
-[https://developer.apple.com/documentation/UIKit/UIModalPresentationStyle/fullScreen]
-*/

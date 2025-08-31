@@ -188,7 +188,11 @@ export const Input: React.FC<InputProps> = ({
         keyboardType={keyboardType} //keybrdType
         //a11y props----
         accessibilityLabel={label} //laebl text
-        accessibilityHint={showError ?? helperText} //subtetx---
+        // scren reader --- checks tae if Input
+        accessibilityState={{
+          disabled: rest.editable === false,
+          invalid: !!showError,
+        }}
       />
 
       {/* ---- subtext ------ */}

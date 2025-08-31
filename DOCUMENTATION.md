@@ -243,3 +243,44 @@ Code Snippet Example:
 ```
 
 ## Color Tokens
+
+The color tokens help maitain a consistent color palette across all components. The color tokens help adapt automatically for the light and dark themes while keeping brand consistency.
+
+### Main Categories
+
+- Primary: Brand pallete color used for main actions Primary Buttons, highlights.
+- Secondary: Neutral text or accent areas, supports the primary color.
+- Surface: Backgrounds for Cards, Inputs, and Modals.
+- Border: Used for outlines, separators, and subtle dividers.
+- Text: Semantic text colors for different states.
+- Semantic: Universal meanings like status feedback colors; like success or error.
+
+### Example Tokens
+
+- `theme.colors.primary[500]`: Main brand color (Bellatrix Theme Red)
+- `theme.colors.surface`: Card and modal backgrounds
+- `theme.colors.border`: Outline and divider lines
+- `theme.colors.text.primary`: Default body text
+- `theme.colors.text.secondary`: Subtle/secondary text
+- `theme.colors.semantic.error`: Error states
+- `theme.colors.semantic.success`: Success states
+
+### Example Usage
+
+```bash
+    <Button variant="primary" style={{
+    # color Token---
+    backgroundColor: theme.colors.primary[500] }}>
+    Save
+    </Button>
+
+    <Card style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.border }}>
+    <Typography variant="body1" color="secondary">
+        This is card content with secondary text.
+    </Typography>
+    </Card>
+
+    <Typography variant="caption" color="error">
+    Invalid email address
+    </Typography>
+```
