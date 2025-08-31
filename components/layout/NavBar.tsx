@@ -9,6 +9,9 @@ import { useAdaptiveNav } from "../../hooks/useAdaptiveNav";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // import new theme Toggle ---
 import { ThemeToggle } from "../design-system/ThemeToggle";
+// router / back buttn
+import { useRouter } from "expo-router";
+import { Button } from "../design-system/Button";
 
 // pasas props
 export const NavigationBar: React.FC = () => {
@@ -16,6 +19,14 @@ export const NavigationBar: React.FC = () => {
   const { theme } = useTheme();
   const { showTopBar, showBottomTabs, tabHeight } = useAdaptiveNav();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+
+  // Basic-->  back  Bttn handler ---
+  const handleBack = () => {
+    // failSafe - fall back prev. page ELSE --> gto home route---
+    if (router.canGoBack?.()) router.back();
+    else router.replace("/");
+  };
 
   // coantienr+styles ---
   const containerStyle: (ViewStyle | undefined)[] = [
@@ -30,11 +41,16 @@ export const NavigationBar: React.FC = () => {
 
       //styles ---
       flexDirection: "row",
+      alignItems: "center",
       // responsiev-> hook else deafult--
       justifyContent: showTopBar ? "flex-start" : "space-around",
+
       //upfstr w/spacing token -- consistency
-      paddingVertical: theme.spacing.sm,
+      // paddingVertical: theme.spacing.sm,
       paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm + (showTopBar ? insets.top : 0),
+      paddingBottom: theme.spacing.sm + (showBottomTabs ? insets.bottom : 0),
+      // style layout/position----
       minHeight: tabHeight,
       position: showBottomTabs ? "absolute" : "relative",
       bottom: showBottomTabs ? 0 : undefined,
@@ -44,6 +60,16 @@ export const NavigationBar: React.FC = () => {
   ];
   return (
     <View style={containerStyle}>
+      {/* bck bttn availabel on pages -- */}
+      <Button
+        variant="ghost"
+        // pass Bttn hndler---
+        onPress={handleBack}
+        // a11y label --
+        accessibilityLabel="Go Back"
+      >
+        ⬅︎ Back
+      </Button>
       {/*nav stuff here---*/}
       <ThemeToggle />
     </View>

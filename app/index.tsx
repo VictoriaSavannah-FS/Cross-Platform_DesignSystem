@@ -7,6 +7,7 @@ import { Typography } from "../components/design-system/Typography";
 import { Button } from "../components/design-system/Button";
 // import SafeAres for ios ---- keep conent on screen
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemeProvider } from "../theme/ThemeProvider";
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -21,6 +22,7 @@ export default function Home() {
         gap: theme.spacing.md,
       }}
     >
+      {/* <ThemeProvider> */}
       {/* <Typography variant="h3">Mode: {theme.mode}</Typography> */}
       {/* Works---- */}
       {/* <Button variant="outline" onPress={toggleTheme}>
@@ -76,6 +78,7 @@ export default function Home() {
           </Button>
         </Link>
       </View>
+      {/* </ThemeProvider> */}
     </SafeAreaView>
   );
 }

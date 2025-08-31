@@ -19,6 +19,7 @@ import {
   StyleSheet,
   FlatList,
   Modal,
+  ViewStyle,
 } from "react-native";
 import { useTheme } from "../../hooks/useTheme";
 import { spacing } from "../../design-tokens/spacing";
@@ -56,6 +57,8 @@ type ModalComponentProps = {
   title?: string;
   footer?: React.ReactNode; //actionRow--> Confrim/Canxxel
   children: React.ReactNode; //target inside Modal content
+  //Allow! extneral styles ---
+  style?: ViewStyle;
 };
 
 // deifni fx+pass Props ^^^
@@ -67,6 +70,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
   title,
   footer,
   children,
+  style, // had to add --
 }) => {
   // impot temes+responsive ----- check paltform/size
 
@@ -79,7 +83,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
   // if not visobl - don't do anything --
   if (!visible) return null;
   /**--Pass Theme tokens for Elevetaed theme Dialogs/FullSCreen  */
-  const overlayColor = "rgba(0,0,,0,0.5)"; //from RNelemnts.
+  const overlayColor = "rgba(0,0,0,0.5)"; //from RNelemnts.
   // passcolo Tokes
   const borderColor = theme.colors.border;
   const surface = theme.colors.surface;
@@ -116,7 +120,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
     container: {
       // width -- RESPONSIVE/paltform
       // width: "92%",
-      width: "90%",
+      width: "95%",
       maxWidth: 560,
 
       // pass dsgn token---
@@ -248,7 +252,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       >
         {/* Dialog container */}
         <View
-          style={dialogStyles.container}
+          style={(dialogStyles.container, style)}
           // a11y: announce this is a dialog
           //   accessibilityRole="Dialog" -- View? Text?
           accessibilityLabel={title ?? "Dialog"}
@@ -281,24 +285,26 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       transparent
     >
       {/* STOP backdrop press from closing when touching the sheet */}
-      <Pressable
-        onPress={() => {}}
-        style={sheetStyles.sheet}
-        //   accessibilityRole="dialog"
-        accessibilityLabel={title ?? "Bottom sheet"}
-      >
-        {/* Grabbr ----- */}
-        <View style={sheetStyles.grabberArea}>
-          <View style={sheetStyles.grabber} />
-        </View>
-        {/* Content */}
-        <View style={sheetStyles.body}>{children}</View>
+      <View style={sheetStyles.overlay}>
+        <Pressable
+          onPress={() => {}}
+          style={sheetStyles.sheet} //merging nboth styles/ defalut or extenal---
+          //   accessibilityRole="dialog"
+          accessibilityLabel={title ?? "Bottom sheet"}
+        >
+          {/* Grabbr ----- */}
+          <View style={sheetStyles.grabberArea}>
+            <View style={sheetStyles.grabber} />
+          </View>
+          {/* Content */}
+          <View style={sheetStyles.body}>{children}</View>
 
-        {/* Footer actions or default Close */}
-        <View style={sheetStyles.footer}>
-          {footer ?? <Button onPress={onClose}>Close</Button>}
-        </View>
-      </Pressable>
+          {/* Footer actions or default Close */}
+          <View style={sheetStyles.footer}>
+            {footer ?? <Button onPress={onClose}>Close</Button>}
+          </View>
+        </Pressable>
+      </View>
     </Modal>
   );
 };
@@ -331,83 +337,3 @@ string	rgba(0, 0, 0, .5)
 - iOS Docs for sheets styles -- so many! 
 [https://developer.apple.com/documentation/UIKit/UIModalPresentationStyle/fullScreen]
 */
-
-/***  COLRO edsing refe
-
-
-export const colors = {
-    //----------- theme : Light -----------
-    // Bellatrix Ligh palette ---
-    light: {
-      background: "#FFFFFF",
-      surface: "#F8FAFC",
-      border: "#E5E7EB", //LGHT BORDER
-      text: {
-        primary: "#0f172a", // TOP important text
-        secondary: "#475569", // subheadings, hints
-        disabled: "#94a3b8", // faded/inactive text
-      },
-      // PRIMARY COLORS --- brdn palette based onshades
-      primary: {
-        50: "#f0f9ff", // lightest
-        100: "#e0f2fe",
-        500: "#0ea5e9", // main brand color
-        600: "#0284c7",
-        900: "#0c4a6e", // darkest
-      },
-      //   UNIVERSAL meanigns ----
-      semantic: {
-        success: "#22c55e", // grenn
-        warning: "#f59e0b", //ornge
-        error: "#ef4444", // red
-        info: "#3b82f6", // blueidsh
-      },
-      // nuetrals - greys/greyscale for contrast
-      neutral: {
-        50: "#f8fafc",
-        100: "#f1f5f9",
-        500: "#64748b",
-        900: "#0f172a",
-      },
-    },
-    //------------  theme : DArk ------------- Main look - my fabvorite look---
-    // Bellatrix dark palette ---
-    dark: {
-      background: "#0b0e13",
-      surface: "#141821",
-      border: "#2a2f3a",
-  
-      text: {
-        primary: "#F5F7FA", // mn text
-        secondary: "#B4BCC9", // subtext
-        disabled: "#5A6270", // muted/disabled text
-      },
-  
-      // Brand = bold red ! Pop of COlor -- we'll see how it looks...
-      primary: {
-        50: "#fff1f1",
-        100: "#ffd6d6",
-        500: "#E11D2F", // main brand RED --> will pass to my Call2Actin bttn tokens ---
-        600: "#C11224",
-        900: "#7A0A14",
-      },
-  
-      // Still neutrals for UI contrast--
-      neutral: {
-        50: "#111318",
-        100: "#171A20",
-        500: "#596173",
-        900: "#F5F7FA",
-      },
-  
-      // same semantics --
-      semantic: {
-        success: "#22c55e",
-        warning: "#f59e0b",
-        error: "#f87171",
-        info: "#60a5fa",
-      },
-    },
-  } as const;
-  
-   */

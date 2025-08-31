@@ -15,6 +15,7 @@ type Variant =
   | "h2"
   | "h3"
   | "h4"
+  | "body"
   | "body1"
   | "body2"
   | "caption"
