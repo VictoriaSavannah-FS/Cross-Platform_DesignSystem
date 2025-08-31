@@ -199,21 +199,47 @@ Modal Component will interrupt the current screen with important content. It's t
     </Modal>
 ```
 
-## Typography Token
+## Typography Component
 
-These Typography tokens ensure consistency across platforms with various text styles.
+These Typography Component ensure consistency across platforms with various text styles. It uses the design tokens (font size, weights, and line heights) to adapt to each platform screen.
 
 ### Variants
 
-- h1
-- h2
-- h3
-- h4
-- body 1
-- body 2
+- h1: Main headings / Headers
+- h2: Section headers
+- h3: sub-section/medium size
+- h4: small headings / can be used for card titles
+- body 1: default body text
+- body 2: smaller body text size
+- caption: usually small subtle text - helper text
+- overline: small uppercase text that sits about headings or sections. Like category or section labels.
+
+### Main Props
+
+Text/Font size Variants:
+
+- `variant`: `"h1" | "h2" | "h3" | "h4" | "body1" | "body2" | "caption" | "overline"`
+
+Color Theme Variants for semantics:
+
+- `color`: `"primary" | "secondary" | "disabled" | "error" | "success"`
+
+Text layout / position variants:
+
+- `align`: `"left" | "center" | "right" | "justify"`
+
+Text weight variants
+
+- `weight`: `"normal" | "medium" | "semibold" | "bold"`
+
+Code Snippet Example:
+
+```bash
+    <Typography variant="h1">Main Title</Typography>
+    <Typography variant="h2">Section Header</Typography>
+    <Typography variant="body1">This is regular body text.</Typography>
+    <Typography variant="caption" color="secondary">Helper text here</Typography>
+    <Typography variant="overline">CATEGORY</Typography>
+```
 
 ## Color Tokens
-
-```
-
-```
