@@ -8,7 +8,7 @@ This app was tested on iOS (monile and iPad/tablets) and Web (browser).
 
 ## Features
 
-- Button System: 3 variants (primary, secondary, ghost) adapted for respective platform conventions
+- Button System: 3 variants (primary, secondary, ghost) adapted for respective platform
 - Input Components: has validation states and platfor-appropriate styling
 - Card Components: responsive layouts and content adaption
 - Navigation Bar: mobile tabs vs desktop horizontal navigation
@@ -38,7 +38,10 @@ Platform-Adaptive Implementations:
 
 ## Enhanced Feature
 
--
+### Option C: Paltfrom Intergration
+
+- Accessibility: A11y Labels for Role and Screen Readers
+- Native touches: haptics (iOS) (need to go back and add a few more)
 
 ## Setup Prject
 
@@ -60,10 +63,27 @@ npm install
 
 3. Run App
 
-- For mobile
+- For Mobile (iOS Simulator)
 
 ```bash
 npx start --ios
 ```
 
 - for Web: `bash npx start --web`
+
+```bash
+npx start --web
+```
+
+## Performance Report
+
+- Tested on iOS SImulator and Web
+- Framerate and Interactions: renders on different platforms flow smoothly and without any noticeable lag or glitching.
+- Cross-Platform Consistency: No frame drops or performance warnings in Expo logs during navigation or modal interactions
+- Result: overall app performance well and is responsive and stable across platforms.
+
+## Documentation & Demo
+
+- Documentation: see DOCUMENTATION.md for design tokens and Component descriptions and further detail notes.
+- Demo Video:assets/demo/demo-video.mp4
+- Screenshots: assets/demo/screenshots

@@ -103,8 +103,12 @@ export default function PlaygroundScreen() {
           </Typography>
 
           {/* Variant picker-> prim / sec / outline / ghost ..boo!*/}
-          <View style={{ gap: 8 }}>
-            <Typography variant="caption" color="secondary">
+          <View style={{ gap, alignItems: "center" }}>
+            <Typography
+              style={styles.sectionSub}
+              variant="caption"
+              color="secondary"
+            >
               Variant | Types | Options
             </Typography>
             <ButtonVariant
@@ -130,7 +134,7 @@ export default function PlaygroundScreen() {
             </Button>
 
             {/* --- row style/render --- */}
-            <View style={[rowStyle, { gap }]}>
+            <View style={[rowStyle, { gap, justifyContent: "center" }]}>
               <Button variant="primary">Primary</Button>
               <Button variant="secondary">Secondary</Button>
               <Button variant="outline">Outline</Button>
@@ -144,7 +148,11 @@ export default function PlaygroundScreen() {
           <Typography variant="h4" style={styles.sectionHeader}>
             Input + Card
           </Typography>
-          <Typography variant="caption" color="secondary">
+          <Typography
+            variant="caption"
+            color="secondary"
+            style={styles.sectionSub}
+          >
             Simple controlled input - Card Input
           </Typography>
 
@@ -166,11 +174,15 @@ export default function PlaygroundScreen() {
             }}
           />
 
-          <Typography variant="caption" color="secondary">
+          <Typography
+            variant="caption"
+            color="secondary"
+            style={styles.sectionSub}
+          >
             Below is wrapped in a Card for surface contrast:
           </Typography>
           <Card style={{ padding: theme.spacing.md }}>
-            <Typography variant="body1">
+            <Typography variant="body1" style={styles.sectionSub}>
               You typed: “{inputValue || "…"}”
             </Typography>
           </Card>
@@ -205,7 +217,7 @@ export default function PlaygroundScreen() {
           <Typography variant="h4" style={styles.sectionHeader}>
             Theme
           </Typography>
-          <Typography variant="body1">
+          <Typography variant="body1" style={styles.sectionSub}>
             Mode:{" "}
             <Typography variant="body1" weight="semibold">
               {theme.mode}
@@ -281,4 +293,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 7,
   },
+  sectionSub: { textAlign: "center" },
 });
