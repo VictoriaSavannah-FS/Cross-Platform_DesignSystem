@@ -36,8 +36,8 @@ export default function PlaygroundScreen() {
   // responsive pltform----
   const { isDesktop, isTablet } = useResponsive();
   //   responsive Padding NAvBAr---
-  const { showBottomTabs, tabHeight } = useAdaptiveNav();
-
+  //  showTopBar--? add some padding for header when navbar is @top
+  const { showBottomTabs, showTopBar, tabHeight } = useAdaptiveNav();
   // -----States to store curnt settings -----
   const [btnVariant, setBtnVariant] = useState<
     // Opts
@@ -46,6 +46,8 @@ export default function PlaygroundScreen() {
 
   // toggle-- Modal ----
   const [modalVisible, setModalVisible] = useState(false);
+  // something fun...???... why not!
+  const [gotchaVisible, setGotchaVisible] = useState(false); //wait for it...
 
   //receive User input ----
   const [inputValue, setInputValue] = useState("");
@@ -60,6 +62,9 @@ export default function PlaygroundScreen() {
     : //   esle -- defaltu token - lgPadding--
       theme.spacing.lg;
 
+  // TOp Padding--> nav@ TOP (web/desktop) --
+  const topPadding = showTopBar ? tabHeight + theme.spacing.sm : 0;
+
   // -------------- UI RENDER ----------------
   return (
     <SafeAreaView
@@ -70,14 +75,21 @@ export default function PlaygroundScreen() {
         //scrool @small screen---
         contentContainerStyle={{
           padding: theme.spacing.md,
+          //  extra top/bttm padding---
+          paddingTop: topPadding, // SOLVES -> header from being hidden
+          paddingBottom: bttmPading, //Sme bttmPadding@Tabs
           //  extra bttm padding---
-          paddingBottom: bttmPading,
+
           gap,
         }}
         keyboardShouldPersistTaps="handled"
       >
         {/* --- Header --- */}
-        <Typography variant="h2" align="center" style={{ marginBottom: gap }}>
+        <Typography
+          variant="h2"
+          align="center"
+          style={{ marginBottom: gap, padding: 6 }}
+        >
           Interactive Playground
         </Typography>
         <Typography variant="body1" color="secondary" align="center">
@@ -86,7 +98,9 @@ export default function PlaygroundScreen() {
 
         {/* Button DEmos ----  */}
         <Card style={{ padding: gap, gap }}>
-          <Typography variant="h4">Button</Typography>
+          <Typography variant="h4" style={styles.sectionHeader}>
+            Button
+          </Typography>
 
           {/* Variant picker-> prim / sec / outline / ghost ..boo!*/}
           <View style={{ gap: 8 }}>
@@ -107,9 +121,10 @@ export default function PlaygroundScreen() {
           {/* Live Preview -- Live Render ----- */}
           <View style={{ gap }}>
             <Button
-              //   fullWidth={btnFullWidth}
               variant={btnVariant}
               accessibilityLabel="Playground button preview"
+              //trigger -boom!
+              onPress={() => setGotchaVisible(true)}
             >
               Press Me... go on.. I dare you...
             </Button>
@@ -126,7 +141,9 @@ export default function PlaygroundScreen() {
 
         {/* Input + CArd COmponent ----- */}
         <Card style={{ padding: gap, gap }}>
-          <Typography variant="h4">Input + Card</Typography>
+          <Typography variant="h4" style={styles.sectionHeader}>
+            Input + Card
+          </Typography>
           <Typography variant="caption" color="secondary">
             Simple controlled input - Card Input
           </Typography>
@@ -161,16 +178,33 @@ export default function PlaygroundScreen() {
 
         {/* ------ THE MODAL COMPONENT ----- */}
         <Card style={{ padding: gap, gap }}>
-          <Typography variant="h4">Modal</Typography>
+          <Typography variant="h4" style={styles.sectionHeader}>
+            Modal
+          </Typography>
 
-          <View style={[rowStyle, { gap }]}>
+          {/* <View style={[rowStyle, { gap }]}>
             <Button onPress={() => setModalVisible(true)}>Open Modal</Button>
+          </View>
+           */}
+          <View style={{ width: "100%" }}>
+            <Button
+              variant="primary"
+              fullWidth={Platform.OS === "web"} // full width only on web
+              onPress={() => setModalVisible(true)}
+              accessibilityLabel="Open modal"
+              // helps in tight flex rows on web; safe to keep
+              style={{ alignSelf: "stretch" }}
+            >
+              Open Modal
+            </Button>
           </View>
         </Card>
 
         {/* Theme utils--- */}
         <Card style={{ padding: gap, gap }}>
-          <Typography variant="h4">Theme</Typography>
+          <Typography variant="h4" style={styles.sectionHeader}>
+            Theme
+          </Typography>
           <Typography variant="body1">
             Mode:{" "}
             <Typography variant="body1" weight="semibold">
@@ -181,6 +215,30 @@ export default function PlaygroundScreen() {
         </Card>
       </ScrollView>
       {/*  Modal OUTSIDE Card so it overlays WHOLE screen --- */}
+      {/* Gotcha -- Modal ... 🙃 */}
+      <Modal
+        visible={gotchaVisible}
+        onClose={() => setGotchaVisible(false)}
+        title="Booooo! 👻 — Gotcha! 😎"
+        footer={
+          <View
+            style={{ flexDirection: "row", justifyContent: "center", gap: 12 }}
+          >
+            <Button variant="ghost" onPress={() => setGotchaVisible(false)}>
+              Close
+            </Button>
+            <Button onPress={() => setGotchaVisible(false)}>
+              😂 You're doneee…
+            </Button>
+          </View>
+        }
+      >
+        <Typography variant="body1" align="center" color="secondary">
+          You're a brave one… I see you. Great job! Go forth and conquer more
+          unknowns…
+        </Typography>
+      </Modal>
+      {/* Actual modal example with theme+tokens  */}
       <Modal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -200,9 +258,9 @@ export default function PlaygroundScreen() {
         <View
           style={{ backgroundColor: theme.colors.primary[600], padding: 16 }}
         >
-          <Typography variant="h3">
-            THIS IS THE MODAL. On the Web it's a Dialog Box that is centered on
-            this SCREEN. On iOS it IS a SHEET that RISES.
+          <Typography variant="body1">
+            This is a Modal Example. On the Web it's a Dialog Box that is
+            centered on the Screen. On iOS it is a sheet that rises.
           </Typography>
         </View>
       </Modal>
@@ -217,5 +275,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
+  },
+  // center headr txt onpage
+  sectionHeader: {
+    textAlign: "center",
+    marginBottom: 7,
   },
 });

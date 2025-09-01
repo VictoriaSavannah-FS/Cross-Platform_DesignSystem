@@ -156,7 +156,8 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       borderTopColor: borderColor,
       //cotent layotu----------------
       flexDirection: "row",
-      justifyContent: "flex-end",
+      justifyContent: "center",
+      alignItems: "center",
       gap: spacing.sm,
       // thin top broder -visuall seperation --
       borderTopWidth: StyleSheet.hairlineWidth,
@@ -169,6 +170,10 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       fontSize: theme.typography.fontSize.lg,
       // TS type checl----
       fontWeight: theme.typography.fontWeight.medium as any,
+      // layout-- fixed issue---
+      paddingBottom: spacing.sm,
+      textAlign: "center",
+      width: "100%",
     },
     // close X btuon arear -
     closeModal: {
@@ -219,6 +224,8 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       fontWeight: theme.typography.fontWeight.medium as any,
       paddingHorizontal: spacing.md,
       paddingBottom: spacing.sm,
+      textAlign: "center",
+      width: "100%",
     },
     // conent dispaly ARea----
     body: {
@@ -230,9 +237,11 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
       // theme/token--
       paddingHorizontal: spacing.md,
       paddingTop: spacing.sm,
+      // layout--
       flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
       gap: spacing.sm,
-      justifyContent: "flex-end",
     },
   });
 

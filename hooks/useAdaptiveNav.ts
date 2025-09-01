@@ -12,7 +12,9 @@ export function useAdaptiveNav() {
    * desktop/web => TOP bar
    * everything else => TABS (bottom)
    * check pltfrom -> if desktop=top, else tabs */
-  const navType: NavType = isDesktop ? "top" : "tabs";
+  // Checks=> top bar on web != tabs only on native handhelds
+  const isWeb = Platform.OS === "web";
+  const navType: NavType = isWeb || isDesktop ? "top" : "tabs";
 
   // Render->depent values/Screen size for NAvtype
 
